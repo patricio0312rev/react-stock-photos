@@ -9,22 +9,36 @@ const searchUrl = `${process.env.REACT_APP_UNSPLASH_URI}/search/photos`;
 function App() {
   const [loading, setLoading] = useState(false);
   const [photos, setPhotos] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
+  const [query, setQuery]  = useState('');
 
   const fetchImages = async () => {
     setLoading(true);
     let url;
 
     const urlPage = `&page=${page}`;
+    const urlQuery = `&query=${query}`;
 
-    url = `${mainUrl + clientId + urlPage}`
+    if(query) {
+      url = `${searchUrl + clientId + urlPage + urlQuery}`;
+    } else {
+      url = `${mainUrl + clientId + urlPage}`;
+    }
 
     try {
       let response = await fetch(url);
       let data = await response.json();
+      console.log(data);
       
+     
       setPhotos((oldPhotos) => {
-        return [...oldPhotos, ...data]
+        if(query && page === 1) {
+          return data.results;
+        } else if(query) {
+          return [...oldPhotos, ...data.results];
+        } else {
+          return [...oldPhotos, ...data];
+        }
       });
     } catch (error) {
       console.log(error);
@@ -35,11 +49,11 @@ function App() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Hello');
+    setPage(1);
   }
 
   useEffect(() => {
-    fetchImages()
+    fetchImages();
   }, [page]);
 
   useEffect(() => {
@@ -57,7 +71,7 @@ function App() {
     <main>
       <section className="search">
         <form className="search-form">
-          <input type="text" placeholder="Buscar" className="form-input" />
+          <input type="text" placeholder="Buscar" className="form-input" value={query} onChange={(e) => setQuery(e.target.value)}/>
           <button type="submit" className="submit-btn" onClick={handleSubmit}><FaSearch /></button>
         </form>
       </section>
