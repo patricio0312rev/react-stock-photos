@@ -9,18 +9,23 @@ const searchUrl = `${process.env.REACT_APP_UNSPLASH_URI}/search/photos`;
 function App() {
   const [loading, setLoading] = useState(false);
   const [photos, setPhotos] = useState([]);
+  const [page, setPage] = useState(1);
 
   const fetchImages = async () => {
     setLoading(true);
     let url;
 
-    url = `${mainUrl + clientId}`
+    const urlPage = `&page=${page}`;
+
+    url = `${mainUrl + clientId + urlPage}`
 
     try {
       let response = await fetch(url);
       let data = await response.json();
       
-      setPhotos(data);
+      setPhotos((oldPhotos) => {
+        return [...oldPhotos, ...data]
+      });
     } catch (error) {
       console.log(error);
     } finally {
@@ -35,7 +40,19 @@ function App() {
 
   useEffect(() => {
     fetchImages()
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    const event = window.addEventListener('scroll', () => {
+      if(!loading && (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 2) {
+        setPage((oldPage) => {
+          return oldPage + 1
+        });
+      }
+    });
+
+    return () => window.removeEventListener('scroll', event);
+  }, [])
   return (
     <main>
       <section className="search">
