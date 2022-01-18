@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { FaSearch } from "react-icons/fa"
+import Photo from "./components/photo.component";
 
 const clientId = `?client_id=${process.env.REACT_APP_UNSPLASH_KEY}`;
 const mainUrl = `${process.env.REACT_APP_UNSPLASH_URI}/photos`;
@@ -9,6 +11,7 @@ function App() {
   const [photos, setPhotos] = useState([]);
 
   const fetchImages = async () => {
+    setLoading(true);
     let url;
 
     url = `${mainUrl + clientId}`
@@ -25,13 +28,37 @@ function App() {
     }
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Hello');
+  }
+
   useEffect(() => {
     fetchImages()
   }, []);
   return (
-    <div className="App">
-      <div>Hello world</div>
-    </div>
+    <main>
+      <section className="search">
+        <form className="search-form">
+          <input type="text" placeholder="Buscar" className="form-input" />
+          <button type="submit" className="submit-btn" onClick={handleSubmit}><FaSearch /></button>
+        </form>
+      </section>
+
+      <section className="photos">
+        <div className="photos-center">
+          {
+            photos.map((photo, key) => {
+              return <Photo key={key} {...photo} />
+            })
+          }
+        </div>
+
+        {
+          loading && <h2 className="loading">Cargando...</h2>
+        }
+      </section>
+    </main>
   );
 }
 
